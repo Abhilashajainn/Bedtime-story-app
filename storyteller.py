@@ -39,11 +39,11 @@ def _age_and_format_rules(age_group: str, story_format: str, chapter_num: Option
         lines.append(fmt)
     if age_group in CLOSING_POEM_AGE_GROUPS:
         lines.append(CLOSING_POEM_INSTRUCTION)
-    
+
     # Only add the vocabulary section/teaser rules if it is NOT the final chapter (Chapter 10)
     if age_group in VOCABULARY_SECTION_AGE_GROUPS and chapter_num != 10:
         lines.append(VOCABULARY_SECTION_INSTRUCTION)
-        
+
     return "\n".join(f"- {line}" for line in lines)
 
 
@@ -82,7 +82,7 @@ Hard rules, always:
 - Do NOT start immediately with dialogue, action, or a problem.
 - The problem/magic event must come ONLY after the setting is grounded.
 {_age_and_format_rules(age_group, story_format)}
-- For age_group "5-7", naturally weave in 1–2 simple daily-life routines (like brushing teeth, cleaning toys, eating meals, or getting ready for bed) ONLY if they fit the scene. Keep them short, concrete, and part of the flow — not a checklist.- Output ONLY the story itself, no preamble, no notes, no "Here is your story:" framing.
+- For age_group "5-7", naturally weave in 1–2 simple daily-life routines (like brushing teeth, cleaning toys, eating meals, or getting ready for bed) ONLY if they fit the scene. Keep them short, concrete, and part of the flow — not a checklist.
 - Output ONLY the story itself (a short title on the first line is welcome), no
   preamble, no notes, no "Here is your story:" framing."""
 
@@ -124,7 +124,7 @@ rules you were given."""
 
 Story category: {category} - {style_guidance}"""
 
-    return call_model(prompt, system=system, temperature=0.9, max_tokens=1200)
+    return call_model(prompt, system=system, temperature=0.9, max_tokens=1500)
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +152,12 @@ def write_personalized_story(profile, story_type: str, lesson: Optional[str], ma
     style_guidance = STORY_TYPES[story_type]
     min_words, max_words = LENGTH_OPTIONS[length_key]
 
+    closing_line = (
+        f'"Goodnight, {profile.name}. And they lived happily ever after."'
+        if chapter_num == 10 else
+        f'"Goodnight, {profile.name}. See you in tomorrow\'s adventure."'
+    )
+
     system = f"""You are a warm, imaginative children's author who writes
 personalized bedtime stories starring the named hero.
 
@@ -160,7 +166,7 @@ Hard rules, always:
 - The hero's name and traits should shape what they do and how they solve the story's
   problem (e.g. a "curious" hero notices a clue others miss; a "kind" hero helps a
   stranger). Don't just insert the name - make the personalization feel earned.
-  - Always clearly establish the physical setting in the first 1–2 sentences (e.g. home, park, bedroom, school).
+- Always clearly establish the physical setting in the first 1–2 sentences (e.g. home, park, bedroom, school).
 - Maintain spatial consistency throughout the story (do not teleport between scenes without transition).
 - Every major scene change must include a transition phrase (e.g. "after a while", "as they finished playing", "later that evening").
 - Never use phrases like "goodbye" or "waved goodbye" unless it is clear WHO is leaving, WHERE they are going, and WHY.
@@ -169,10 +175,17 @@ Hard rules, always:
   (2) mood
   (3) normal activity BEFORE disruption
 - Inciting event must never be in sentence 1.
+- LENGTH IS A HARD REQUIREMENT, NOT A SUGGESTION: the finished story must be between
+  {min_words} and {max_words} words. An under-length story is a failure condition just
+  like breaking any other rule here - if you would naturally stop early, add another
+  small story beat, more sensory/descriptive detail, or a bit more dialogue rather than
+  ending the story short. Do not pad with filler; add real story content.
 - The final ~20% of the story must slow down: shorter, slower sentences, gentle
   repetitive/calming imagery (wind, stars, quiet), settling toward sleep.
-- The very last line of the story itself must be exactly: "Goodnight, {profile.name}. And they lived happily ever after." if chapter_num == 10 else f'The very last line of the story itself must be exactly: "Goodnight, {profile.name}. See you in tomorrow\'s adventure."'{_age_and_format_rules(age_group, story_format, chapter_num)}
-- For age_group "5-7", naturally weave in 1–2 simple daily-life routines (like brushing teeth, cleaning toys, eating meals, or getting ready for bed) ONLY if they fit the scene. Keep them short, concrete, and part of the flow — not a checklist.- Output ONLY the story itself, no preamble, no notes, no "Here is your story:" framing."""
+- The very last line of the story itself must be exactly: {closing_line}
+{_age_and_format_rules(age_group, story_format, chapter_num)}
+- For age_group "5-7", naturally weave in 1–2 simple daily-life routines (like brushing teeth, cleaning toys, eating meals, or getting ready for bed) ONLY if they fit the scene. Keep them short, concrete, and part of the flow — not a checklist.
+- Output ONLY the story itself, no preamble, no notes, no "Here is your story:" framing."""
 
     traits_str = ", ".join(profile.traits) if profile.traits else "curious and kind"
     favorites_str = ", ".join(profile.favorites) if profile.favorites else "everyday adventures"
@@ -233,18 +246,28 @@ and loves {favorites_str}. {cast_str}{lesson_str}{twist_str}{sequel_str}{title_i
 
 Story type: {story_type.replace('_', ' ')} - {style_guidance}
 
-Target length: {min_words}-{max_words} words."""
+Target length: this MUST be between {min_words} and {max_words} words - not a rough
+guide. Verify your layout matches the requested structural blueprint rules to hit this range cleanly without using repetitive filler phrases. - add real story content."""
 
     if previous_story and feedback:
+        current_word_count = len(previous_story.split())
         prompt = f"""{base_prompt}
 
-Here is a previous draft:
+Here is a previous draft ({current_word_count} words):
 ---
 {previous_story}
 ---
 
 An editor gave this feedback: "{feedback}"
-Rewrite the story to address it while keeping what already worked."""
+
+If the feedback mentions the story being under the target word count: you MUST
+add genuinely NEW story content to reach {min_words}-{max_words} words - a new
+small scene, an additional character interaction, another obstacle or moment
+of discovery, more sensory detail, extra dialogue. Do NOT just rephrase or pad
+existing sentences with extra adjectives - that will not add enough length and
+is not an acceptable fix. Do not shrink or remove existing content unless it
+directly conflicts with the feedback. Otherwise, rewrite the story to address
+the feedback while keeping what already worked."""
     elif previous_story and user_feedback:
         prompt = f"""{base_prompt}
 
@@ -265,4 +288,4 @@ as specified."""
     else:
         prompt = base_prompt
 
-    return call_model(prompt, system=system, temperature=0.9, max_tokens=1400)
+    return call_model(prompt, system=system, temperature=0.9, max_tokens=2200)

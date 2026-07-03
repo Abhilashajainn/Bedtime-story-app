@@ -108,9 +108,9 @@ MAGIC_TWIST_EXAMPLES = [
 
 # (min_words, max_words) targets for each length option.
 LENGTH_OPTIONS = {
-    "short": (250, 350),
-    "medium": (450, 600),
-    "long": (650, 850),
+    "short": (200, 330),
+    "medium": (350, 470),
+    "long": (500, 650),
 }
 
 

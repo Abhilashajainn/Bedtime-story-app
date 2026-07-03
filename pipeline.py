@@ -11,7 +11,7 @@ times if needed.
 from dataclasses import dataclass, field
 from typing import Optional
 
-from categories import CATEGORIES, STORY_TYPES
+from categories import CATEGORIES, LENGTH_OPTIONS, STORY_TYPES
 from categorizer import categorize_request
 from config import MAX_REVISIONS
 from judge import judge_story
@@ -68,10 +68,16 @@ def generate_personalized_story(profile, story_type: str, lesson: Optional[str],
     if chapter_num:
         user_input_label += f" (chapter {chapter_num})"
 
+    # Word count target for this length choice, passed through to the judge so its
+    # HARD LENGTH RULE has an actual range to check the draft against.
+    min_words, max_words = LENGTH_OPTIONS[length_key]
+
     story = write_personalized_story(profile, story_type, lesson, magic_twist, length_key,
                                       age_group=age_group, story_format=story_format,
                                       chapter_num=chapter_num, sequel_recap=sequel_recap)
-    verdict = judge_story(user_input_label, story_type, STORY_TYPES[story_type], story, story_format=story_format, age_group=age_group)
+    verdict = judge_story(user_input_label, story_type, STORY_TYPES[story_type], story,
+                           story_format=story_format, age_group=age_group,
+                           min_words=min_words, max_words=max_words)
     history = [(story, verdict)]
 
     if verbose:
@@ -84,7 +90,9 @@ def generate_personalized_story(profile, story_type: str, lesson: Optional[str],
                                           age_group=age_group, story_format=story_format,
                                           chapter_num=chapter_num, sequel_recap=sequel_recap,
                                           feedback=verdict.feedback, previous_story=story)
-        verdict = judge_story(user_input_label, story_type, STORY_TYPES[story_type], story, story_format=story_format, age_group=age_group)
+        verdict = judge_story(user_input_label, story_type, STORY_TYPES[story_type], story,
+                               story_format=story_format, age_group=age_group,
+                               min_words=min_words, max_words=max_words)
         history.append((story, verdict))
         if verbose:
             print(f"[judge] revision {revisions} score={verdict.score}/10 pass={verdict.passed}  feedback: {verdict.feedback}")
