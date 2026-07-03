@@ -57,6 +57,36 @@ The application isolates its data layer into two explicit JSON-backed data store
 * **Clean Library view:** Only displays `Title (X chapters)`.
 * **Universal Back Button:** Type `Back` or select the `Back` option at any menu. If you choose `Back` on the final save screen, it loops you back to the editing prompt instead of kicking you out to the main menu.
 
+
+## Judge Model Metrics & Evaluation Strategy
+
+The system utilizes a zero-variance (`temperature=0.0`), deterministic evaluation pipeline to enforce strict guardrails before any story is passed back to the user.
+
+### 1. Guardrail Scoring Matrix
+
+If a draft violates core rules, the Judge is instructed to heavily penalize and fail the story:
+
+* **HARD SAFETY RULE:** Zero tolerance for violence, fear, weapons, romance, or adult themes $\rightarrow$ **Score capped $\le$ 3, `pass = False**`.
+* **HARD LENGTH RULE:** Real-world word count must fall precisely within the chosen `LENGTH_OPTIONS` $\rightarrow$ **Score capped at 6, `pass = False**`.
+
+### 2. Programmatic Verification
+
+To bypass the known limitation of LLMs struggling with token-to-word counting, the system calculates length programmatically via Python before constructing the evaluation prompt:
+
+```python
+actual_word_count = len(story.split())
+
+```
+
+This precise calculation is injected directly into the prompt as a hard constraint, eliminating self-reporting hallucination.
+
+### 3. Structural Demographics Gate
+
+The Judge systematically validates age-specific schema requirements:
+
+* **Ages 5–7:** Verifies the inclusion of a 4-to-6-line rhyming closure titled `"A Little Poem for You:"`.
+* **Ages 8–10:** Verifies the inclusion of a 3-to-5 word child-friendly glossary titled `"Words You Learned Today:"`.
+
 ---
 
 ## Field Testing & Observations
@@ -65,6 +95,52 @@ I put the application to the test with my two 4-year-old cousins during a quiet 
 
 * **The Power of Crossovers:** They both absolutely loved the **Personal Story** mode. Seeing themselves written directly into the adventure alongside their favorite cartoon characters, Peppa Pig and George, kept them completely locked in.
 * **The Nap Effect:** Immediately after narrating just two personalized stories, the older of the two became incredibly drowsy and lazy, drifting right off into an unexpected afternoon nap. The story proved so soothing that it completely calmed the child's imagination and lulled them right to sleep.
+
+## Test Architecture & Offline Verification
+
+The application features a network-isolated testing suite in `test.py` that runs 100% offline in sub-second time ($\approx 0.1$s) to ensure system stability without incurring API costs.
+
+### 1. Key Design Strategies
+
+* **Zero Network Dependency:** Replaces live OpenAI endpoints with mock dataclasses (`MockCompletionResponse`) matching the official SDK structure.
+* **Disk Sandboxing:** Uses Python's `mock_open` to simulate all JSON file operations in memory, completely protecting production storage files from corruption.
+* **Deterministic Contract Testing:** Isolates and tests business logic directly by passing hardcoded string inputs and mocking expected engine behaviors.
+
+### 2. Test Coverage Matrix
+
+| Component | Test Logic | Success Metric |
+| --- | --- | --- |
+| **Core Client** (`llm_client.py`) | API responses and connection failure loops. | Strips whitespace anomalies; handles exceptions safely. |
+| **Storyteller** (`storyteller.py`) | Context compilation across all 3 creation modes. | Confirms proper parameter and profile mapping. |
+| **Judge** (`judge.py`) | Grading rubrics, schema parsing, and text counters. | Validates passing flows, catches out-of-range length caps, and enforces JSON fallbacks. |
+| **Library** (`library.py`) | Schema storage, updates, and indexing. | Verifies duplicate title rejection, unique IDs, and sequential chapter increments. |
+
+### 3. Execution Output
+
+Running `python3 test.py` executes the full suite with explicit verification logs:
+
+```text
+============================================================
+ STARTING TEST SUITE WITH LOGS...
+============================================================
+ [TEST] Running: test_call_model_success
+   -> Invoking llm_client.call_model() with text framing...
+   ✅ [PASSED] Content successfully stripped and returned: 'Once upon a time...'
+
+ [TEST] Running: test_judge_story_length_constraint_failure_override
+   -> Testing intentional word count failure (Story length: 22 words, Target: 350-470)...
+   ✅ [PASSED] Python engine safely overrode feedback with custom message block
+
+ [TEST] Running: test_add_chapter_increments_sequence
+   -> Appending subsequent chapter onto historical user sequence logs...
+   ✅ [PASSED] Bookshelf safely auto-incremented sequence pointer to index: 2
+
+------------------------------------------------------------
+Ran 13 tests in 0.101s
+
+OK
+
+```
 
 ---
 
@@ -119,6 +195,13 @@ what the Judge thinks looks good on paper. Two ways that data could help:
 
 This turns story quality into something that improves automatically over
 time, instead of only improving when a developer manually tweaks a prompt.
+
+### 6. Centralized Database Migration
+
+To prepare for production loads and multi-user sync, the local flat files (`bookshelf.json` and `saved_stories.json`) will transition to a robust relational or NoSQL database (e.g., PostgreSQL or MongoDB).
+
+* **Common Data Interface:** Refactor `library.py` using the Repository Pattern to abstract the storage layer. This ensures switching JSON logic for database connection pools requires zero changes to core storytelling or execution loops.
+* **Data Scale Benefits:** A centralized database enables optimized query indexing (on `user_id`/`book_id`), concurrent data updates, seamless schema migrations, and real-time data feeding into analytics and parent feedback loops.
 
 ---
 
