@@ -87,15 +87,6 @@ The Judge systematically validates age-specific schema requirements:
 * **Ages 5–7:** Verifies the inclusion of a 4-to-6-line rhyming closure titled `"A Little Poem for You:"`.
 * **Ages 8–10:** Verifies the inclusion of a 3-to-5 word child-friendly glossary titled `"Words You Learned Today:"`.
 
----
-
-## Field Testing & Observations
-
-I put the application to the test with my two 4-year-old cousins during a quiet afternoon, and the results were highly telling:
-
-* **The Power of Crossovers:** They both absolutely loved the **Personal Story** mode. Seeing themselves written directly into the adventure alongside their favorite cartoon characters, Peppa Pig and George, kept them completely locked in.
-* **The Nap Effect:** Immediately after narrating just two personalized stories, the older of the two became incredibly drowsy and lazy, drifting right off into an unexpected afternoon nap. The story proved so soothing that it completely calmed the child's imagination and lulled them right to sleep.
-
 ## Test Architecture & Offline Verification
 
 The application features a network-isolated testing suite in `test.py` that runs 100% offline in sub-second time ($\approx 0.1$s) to ensure system stability without incurring API costs.
@@ -141,6 +132,13 @@ Ran 13 tests in 0.101s
 OK
 
 ```
+
+## Field Testing & Observations
+
+I put the application to the test with my two 4-year-old cousins during a quiet afternoon, and the results were highly telling:
+
+* **The Power of Crossovers:** They both absolutely loved the **Personal Story** mode. Seeing themselves written directly into the adventure alongside their favorite cartoon characters, Peppa Pig and George, kept them completely locked in.
+* **The Nap Effect:** Immediately after narrating just two personalized stories, the older of the two became incredibly drowsy and lazy, drifting right off into an unexpected afternoon nap. The story proved so soothing that it completely calmed the child's imagination and lulled them right to sleep.
 
 ---
 
