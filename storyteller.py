@@ -82,7 +82,7 @@ Hard rules, always:
 - Do NOT start immediately with dialogue, action, or a problem.
 - The problem/magic event must come ONLY after the setting is grounded.
 {_age_and_format_rules(age_group, story_format)}
-- If age_group is "5-7", include simple daily life activities like brushing teeth, cleaning toys, helping with chores, eating meals, or getting ready for bed. Keep them very concrete and familiar.
+- For age_group "5-7", naturally weave in 1–2 simple daily-life routines (like brushing teeth, cleaning toys, eating meals, or getting ready for bed) ONLY if they fit the scene. Keep them short, concrete, and part of the flow — not a checklist.- Output ONLY the story itself, no preamble, no notes, no "Here is your story:" framing.
 - Output ONLY the story itself (a short title on the first line is welcome), no
   preamble, no notes, no "Here is your story:" framing."""
 

@@ -1,6 +1,10 @@
 # Hippocratic AI Coding Assignment
 Welcome to the [Hippocratic AI](https://www.hippocraticai.com) coding assignment
 
+[!NOTE]
+
+Implementation Details: The full system architecture, prompting strategies, and behavioral design notes—including how the app successfully channels a child's active imagination into a soothing, sleep-inducing story—are detailed in DESIGN.md.
+
 ## Instructions
 The attached code is a simple python script skeleton. Your goal is to take any simple bedtime story request and use prompting to tell a story appropriate for ages 5 to 10.
 - Incorporate a LLM judge to improve the quality of the story

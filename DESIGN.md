@@ -64,7 +64,7 @@ The application isolates its data layer into two explicit JSON-backed data store
 I put the application to the test with my two 4-year-old cousins during a quiet afternoon, and the results were highly telling:
 
 * **The Power of Crossovers:** They both absolutely loved the **Personal Story** mode. Seeing themselves written directly into the adventure alongside their favorite cartoon characters, Peppa Pig and George, kept them completely locked in.
-* **The Nap Effect:** Immediately after narrating just two personalized stories, the older of the two became incredibly drowsy and lazy, drifting right off into an unexpected afternoon nap. It turns out the app's calming imagery design patterns works exactly as intended on a child's active imagination.
+* **The Nap Effect:** Immediately after narrating just two personalized stories, the older of the two became incredibly drowsy and lazy, drifting right off into an unexpected afternoon nap. The story proved so soothing that it completely calmed the child's imagination and lulled them right to sleep.
 
 ---
 

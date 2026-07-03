@@ -58,6 +58,7 @@ def judge_story(user_input: str, style_label: str, style_description: str, story
   - no romance or kissing
   - no death or loss trauma
   - no unsafe real-world instructions
+  - nothing illegal
 - Matches the original request: "{user_input}"
 - Fits the "{style_label}" story style: {style_description}
 - {form_note}
