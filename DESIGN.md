@@ -221,7 +221,7 @@ To prepare for production loads and multi-user sync, the local flat files (`book
 1. Install dependencies:
 
 ```bash
-pip install openai
+pip install openai python-dotenv
 
 ```
 
